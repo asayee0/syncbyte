@@ -1,2 +1,3 @@
 # syncbyte
-software engineering 2 project
+Software Engineering 2 project
+music player and streamer
