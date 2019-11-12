@@ -138,7 +138,9 @@ def set_ip(sub):
 
 def directorychooser():
     global currsong
-    directory = r'C:\Users\Marcus\Desktop\mmusicovernetworktest'
+    #directory = r'C:\Users\Marcus\Desktop\mmusicovernetworktest'
+    directory = os.getcwd()
+    directory=os.path.join(directory,'music')
     os.chdir(directory)
 
     for files in os.listdir(directory):
