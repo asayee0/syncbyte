@@ -1,6 +1,7 @@
 from __future__ import print_function
 import os
 from tkinter.filedialog import askdirectory
+import pickle
 
 import socket 
 
@@ -16,6 +17,11 @@ listofsongs = []
 realnames = []
 currsong=''
 sip=''
+song_info={
+    "song_data":'',
+    "time_stamp":'',
+    "song_title":''
+}
 
 v = StringVar()
 songlabel = Label(root,textvariable=v,width=35)
@@ -46,6 +52,7 @@ def serverConnect():
     print('Starting to listen for requests')
     c, addr = s.accept() # accept connection from client
     sendMusic(s,c,addr)
+   
 
 def clientConnect():
     global sip
@@ -61,15 +68,23 @@ def clientConnect():
 
     
 def recvMusic(s):
-    f = open('testsuccess.mp3','wb') # Open in binary
-
+    #f = open('testssdjkghdfhgjuccess.mp3','wb') # Open in binary
+    data=b''
     while True:
-        musfile=s.recv(4096) 
-        if not musfile:
+        musfile=s.recv(4096)
+        data+=musfile
+        if not musfile:  
             break
-        f.write(musfile)
+   
+    pickled_info = pickle.loads(data)
+    f = open(pickled_info["song_title"]+'_sb.mp3','wb') # Open in binary
+    f.write(pickled_info["song_data"])
+        
+        
     print('writing to file complete')
     f.close()
+    pygame.mixer.music.load(pickled_info["song_title"]+'_sb.mp3')
+    pygame.mixer.music.play(loops=0,start=int(int(pickled_info["time_stamp"])/1000))
     
     
     s.close()               # Close the socket when done
@@ -77,13 +92,17 @@ def recvMusic(s):
 
 def sendMusic(s,c,addr):
     global currsong
-    f = open('testfile.mp3','rb') #open in binary //put back currsong variable
+    f = open(currsong,'rb') #open in binary //put back currsong variable
     #while True:
     print('here')
     
     print('Got connection from ', addr)
     tosend=f.read()
-    c.sendall(tosend)
+    song_info["song_title"]=currsong
+    song_info["song_data"]=tosend
+    song_info["time_stamp"]=str(pygame.mixer.music.get_pos())
+    pickled_info=pickle.dumps(song_info)
+    c.sendall(pickled_info)    #send pickled_info
     print('sending complete')
     c.close() # close connection after processing
 
@@ -118,7 +137,7 @@ def set_ip(sub):
     sub.destroy()
 
 def directorychooser():
-
+    global currsong
     directory = r'C:\Users\Marcus\Desktop\mmusicovernetworktest'
     os.chdir(directory)
 
@@ -135,7 +154,10 @@ def directorychooser():
 
     pygame.mixer.init()
     pygame.mixer.music.load(listofsongs[0])
+    
     currsong=listofsongs[0]
+    print(currsong)
+    song_info["song_title"]=currsong
     pygame.mixer.music.play()
    
 
@@ -159,6 +181,7 @@ def nextsong(event):
     pygame.mixer.music.play()
     updatelabel()
     currsong=listofsongs[index]
+    song_info["song_data"]=currsong
     print(currsong)
 
 def prevsong(event):
@@ -170,6 +193,7 @@ def prevsong(event):
     pygame.mixer.music.play()
     updatelabel()
     currsong=listofsongs[index]
+    song_info["song_data"]=currsong
     print (currsong)
 
 
