@@ -1,13 +1,12 @@
-#1. Refactor
-#2. Create client
 from __future__ import print_function
 import os, pickle, socket, pygame
-
 from tkinter.filedialog import askdirectory
 from mutagen.id3 import ID3
 from tkinter import *
+from threading import Thread
 
 root = Tk()
+root.title('SyncPlay Server')
 root.minsize(300,300)
 listofsongs = []
 realnames = []
@@ -92,7 +91,6 @@ def recvMusic(s):
     pygame.mixer.music.play(loops=0,start=int(int(pickled_info["time_stamp"])/1000))   
     s.close() # Close the socket when done
     
-
 def sendMusic(s,c,addr):
     global currsong
     f = open(currsong,'rb') #open in binary //put back currsong variable 
@@ -111,19 +109,8 @@ def get_ip(e1,sub):
     sip=e1.get()
     clientConnect()
     sub.destroy()
-    
-def set_ip(sub):
-    serverConnect()
-    sub.destroy()
 
 class Controls:
-    def createServer(event):
-        sub=Toplevel(root)
-        sub.title('Create a Server')
-        sub.minsize(300,100)
-        Button(sub,text='Create',command=(lambda s=sub:set_ip(s))).grid(row=2,column=0)
-        Button(sub,text='Cancel',command=sub.destroy).grid(row=2,column=1)
-
     def connectToServer(event):
         sub=Toplevel(root)
         sub.title('server address')
@@ -169,13 +156,9 @@ class Controls:
 
     def unpausesong(event):
         pygame.mixer.music.unpause()
-        updatelabel()    
+        updatelabel()
 
-def main():
-    directorychooser()
-    updatelabel()
-    #Controls.createServer()
-
+def screenMain():
     label = Label(root,text='Playlist')
     label.pack()
 
@@ -200,14 +183,24 @@ def main():
     clientbutton.pack()
     serverbutton = Button(root,text='Create Server')
     serverbutton.pack()
+    exitbutton = Button(root, text='Exit')
+    exitbutton.pack()
+
     nextbutton.bind("<Button-1>",Controls.nextsong)
     previousbutton.bind("<Button-1>",Controls.prevsong)
     pausebutton.bind("<Button-1>",Controls.pausesong)
     unpausebutton.bind("<Button-1>",Controls.unpausesong)
     stopbutton.bind("<Button-1>",Controls.stopsong)
     clientbutton.bind("<Button-1>",Controls.connectToServer)
-    serverbutton.bind("<Button-1>",Controls.createServer)
+    exitbutton.bind("<Button-1>", lambda event: exit())
     songlabel.pack()
+    
+    Thread(target = serverConnect).start()
     root.mainloop()
+
+def main():
+    directorychooser()
+    updatelabel()
+    screenMain()
 
 main()
