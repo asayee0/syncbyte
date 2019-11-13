@@ -4,7 +4,7 @@ from tkinter.filedialog import askdirectory
 from mutagen.id3 import ID3
 from tkinter import *
 from threading import Thread
-
+#
 root = Tk()
 root.title('SyncPlay Server')
 root.minsize(100,50)
