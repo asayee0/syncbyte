@@ -7,8 +7,8 @@ from threading import Thread
 import time
 #
 root = Tk()
-root.title('SyncPlay Server')
-root.minsize(100,50)
+root.title('SyncPlay Client')
+root.minsize(200,200)
 listofsongs = []
 realnames = []
 currsong=''
@@ -41,7 +41,6 @@ def directorychooser():
 
 def updatelabel():
     global index
-    #global songname
     v.set(realnames[index])
    
 def clientConnect():
@@ -51,13 +50,12 @@ def clientConnect():
     port = 5555               # Reserve a port for your service.
     server_addr = (host, port)
     s.connect(server_addr)
-    #s.setblocking(False)
     print('Connection to server successful')
     while True:
         try:
             recvMusic(s)
         except:
-            print('error in recv music probably')
+            print('Error in recvMusic()')
             time.sleep(3)
     
 def recvMusic(s):
@@ -84,7 +82,6 @@ def recvMusic(s):
         f.close()
         pygame.mixer.music.load(pickled_info["song_title"]+'_sb.mp3')
         pygame.mixer.music.play(loops=0,start=int(int(pickled_info["time_stamp"])/1000)+4)
-        #s.close() # Close the socket when done
     
 def sendMusic(s,c,addr):
     global currsong
@@ -102,11 +99,11 @@ def sendMusic(s,c,addr):
 def get_ip(e1,sub):
     global sip
     sip=e1.get()
-    clientConnect()
     sub.destroy()
+    clientConnect()
 
 class Controls:
-    def connectToServer():
+    def connectToServer(event = None):
         sub=Toplevel(root)
         sub.title('server address')
         sub.minsize(300,100)
@@ -154,6 +151,9 @@ class Controls:
         updatelabel()
 
 def screenMain():
+    connectButton = Button(root, text='Connect to Server')
+    connectButton.pack()
+    connectButton.bind("<Button-1>", Controls.connectToServer)
     exitbutton = Button(root, text='Exit')
     exitbutton.pack()
     exitbutton.bind("<Button-1>", lambda event: exit())
@@ -166,4 +166,5 @@ def main():
     updatelabel()
     screenMain()
 
-main()
+if __name__ == "__main__":
+    main()
