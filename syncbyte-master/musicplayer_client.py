@@ -166,5 +166,4 @@ def main():
     updatelabel()
     screenMain()
 
-if __name__ == "__main__":
-    main()
+main()

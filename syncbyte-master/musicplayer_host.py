@@ -43,13 +43,11 @@ def directorychooser():
     print(currsong)
     song_info["song_title"]=currsong
     pygame.mixer.music.play()
-    return True
 
 def updatelabel():
     global index
     #global songname
     v.set(realnames[index])
-    return True
 
 def listenForClient():
     global s
@@ -66,7 +64,6 @@ def listenForClient():
                         # make socket at server listen for incoming inconnections
     s.listen(10)
     print('Starting to listen for requests')
-    return True
 
 def serverConnect():
     global s
@@ -82,7 +79,7 @@ def clientConnect():
     port = 5555               # Reserve a port for your service.
     server_addr = (host, port)
     s.connect(server_addr)
-    print('Connection to server successful')
+    print('connection to server successful')
     recvMusic(s)
     
 def recvMusic(s):
@@ -130,8 +127,8 @@ class Controls:
         Label(sub, text="Server IP").grid(row=0)
         e1 = Entry(sub)
         e1.grid(row=0, column=1)
-        Button(sub,text='Connect',command=(lambda e=e1,s=sub:get_ip(e,s))).grid(row=3,column=1)
-        Button(sub,text='Cancel',command=sub.destroy).grid(row=3,column=2)
+        Button(sub,text='Connect',command=(lambda e=e1,s=sub:get_ip(e,s))).grid(row=3,column=0)
+        Button(sub,text='Cancel',command=sub.destroy).grid(row=3,column=1)
 
     def nextsong(event):
         global index
@@ -181,7 +178,6 @@ class Controls:
         updatelabel()
 
 def screenMain():
-    global result
     label = Label(root,text='Playlist')
     label.pack()
 
@@ -191,27 +187,23 @@ def screenMain():
     for items in realnames:
         listbox.insert(0,items)
     realnames.reverse()
-    message = Label(root,text='Current Song')
-    message.pack()
-    songlabel.pack()
 
     nextbutton = Button(root,text = 'Next Song')
+    nextbutton.pack()
     previousbutton = Button(root,text = 'Previous Song')
+    previousbutton.pack()
     pausebutton = Button(root,text = 'Pause Song')
+    pausebutton.pack()
     unpausebutton = Button(root,text = 'Unpause Song')
+    unpausebutton.pack()
     stopbutton = Button(root,text='Stop Music')
+    stopbutton.pack()
     clientbutton = Button(root,text='Connect to Server')
+    clientbutton.pack()
     serverbutton = Button(root,text='Create Server')
+    serverbutton.pack()
     exitbutton = Button(root, text='Exit')
-    exitbutton.pack(side=BOTTOM)
-    clientbutton.pack(side=BOTTOM)
-    serverbutton.pack(side=BOTTOM)
-    previousbutton.pack(side=LEFT)
-    pausebutton.pack(side=LEFT)
-    stopbutton.pack(side=LEFT)
-    nextbutton.pack(side=RIGHT)
-    unpausebutton.pack(side=RIGHT)
-
+    exitbutton.pack()
 
     nextbutton.bind("<Button-1>",Controls.nextsong)
     previousbutton.bind("<Button-1>",Controls.prevsong)
@@ -220,7 +212,8 @@ def screenMain():
     stopbutton.bind("<Button-1>",Controls.stopsong)
     clientbutton.bind("<Button-1>",Controls.connectToServer)
     exitbutton.bind("<Button-1>", lambda event: exit())
-
+    songlabel.pack()
+    
     Thread(target = serverConnect, daemon=True).start()
     root.mainloop()
 
@@ -230,5 +223,4 @@ def main():
     updatelabel()
     screenMain()
 
-if __name__ == "__main__":
-   main()
+main()
