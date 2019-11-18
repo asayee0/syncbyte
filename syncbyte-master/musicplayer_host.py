@@ -6,27 +6,6 @@ from tkinter import *
 from threading import Thread
 import time
 
-# create a TCP socket for the server
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # get the address of localhost
-host = socket.gethostbyname('localhost')
-port = 5555
-
-    # set options to circumvent proper socket release
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-    # create pair for host address (this machine)
-host_addr = (host, port)
-s.bind(host_addr) # bind socket to aforementioned address
-
-    # make socket at server listen for incoming inconnections
-s.listen(10)
-print('Starting to listen for requests')
-c=''
-addr=''
-
-
 root = Tk()
 root.title('SyncPlay Server')
 root.minsize(300,300)
@@ -34,6 +13,8 @@ listofsongs = []
 realnames = []
 currsong=''
 sip=''
+c=''
+addr=''
 song_info={
     "song_data":'',
     "time_stamp":'',
@@ -66,6 +47,27 @@ def updatelabel():
     global index
     #global songname
     v.set(realnames[index])
+    return True
+
+def listenForClient():
+    # create a TCP socket for the server
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # get the address of localhost
+    host = socket.gethostbyname('localhost')
+    port = 5555
+
+    # set options to circumvent proper socket release
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    # create pair for host address (this machine)
+    host_addr = (host, port)
+    s.bind(host_addr) # bind socket to aforementioned address
+
+    # make socket at server listen for incoming inconnections
+    s.listen(10)
+    print('Starting to listen for requests')
+    return True
 
 def serverConnect():
     global s
@@ -74,7 +76,6 @@ def serverConnect():
     c, addr = s.accept() # accept connection from client
     sendMusic(s,c,addr)
     
-   
 def clientConnect():
     global sip
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         # Create a socket object
@@ -227,8 +228,10 @@ def screenMain():
     root.mainloop()
 
 def main():
+    listenForClient()
     directorychooser()
     updatelabel()
     screenMain()
 
-main()
+if __name__ == "__main__":
+    main()
