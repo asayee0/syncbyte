@@ -1,12 +1,12 @@
 from unittest import TestCase
-import musicplayer_host
+from musicplayer_host import *
 
 class TestHostMethods(TestCase):
-    def test_listenForClient(self):
-        self.assertEqual(True, musicplayer_host.listenForClient())
+    def test_songPlay(self):
+        self.assertTrue(listenForClient())
 
     def test_directoryChooser(self):
-        self.assertEqual(True, musicplayer_host.directorychooser())
+        self.assertTrue(directorychooser())
 
     def test_updatelabel(self):
-        self.assertEqual(True, musicplayer_host.updatelabel())
+        self.assertTrue(updatelabel())

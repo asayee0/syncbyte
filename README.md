@@ -17,6 +17,9 @@
 
 # Team
 Miguel Forde 
+
 Chanelle Glasglow
+
 Marcus Hackshaw
+
 Asa Yee

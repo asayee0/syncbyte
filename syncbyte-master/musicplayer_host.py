@@ -83,7 +83,7 @@ def sendMusic(s,c,addr):
     song_info["time_stamp"]=str(pygame.mixer.music.get_pos())
     pickled_info=pickle.dumps(song_info)
     c.sendall(pickled_info)    #send pickled_info
-    time.sleep(7)
+    time.sleep(15)
     c.send(bytes("done",'utf-8'))
     print('sending complete')
 

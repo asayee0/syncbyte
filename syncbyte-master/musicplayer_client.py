@@ -43,6 +43,7 @@ def directorychooser():
 def updatelabel():
     global index
     v.set(realnames[index])
+    return True
    
 def clientConnect():
     global sip
@@ -57,7 +58,7 @@ def clientConnect():
             recvMusic(s)
         except:
             print('Error in recvMusic(s)')
-            time.sleep(7)
+            time.sleep(15)
     
 def recvMusic(s):
     data=b''
