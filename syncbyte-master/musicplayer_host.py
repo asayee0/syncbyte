@@ -15,6 +15,7 @@ currsong=''
 sip=''
 c=''
 addr=''
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 song_info={
     "song_data":'',
     "time_stamp":'',
@@ -45,14 +46,10 @@ def directorychooser():
 
 def updatelabel():
     global index
-    #global songname
     v.set(realnames[index])
     return True
 
 def listenForClient():
-    # create a TCP socket for the server
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
     # get the address of localhost
     host = socket.gethostbyname('localhost')
     port = 5555
@@ -76,32 +73,6 @@ def serverConnect():
     c, addr = s.accept() # accept connection from client
     sendMusic(s,c,addr)
     
-def clientConnect():
-    global sip
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         # Create a socket object
-    host = socket.gethostbyname(sip) # Get local machine name (host to connect to)
-    port = 5555               # Reserve a port for your service.
-    server_addr = (host, port)
-    s.connect(server_addr)
-    print('connection to server successful')
-    recvMusic(s)
-    
-def recvMusic(s):
-    data=b''
-    while True:
-        musfile=s.recv(4096)
-        data+=musfile
-        if not musfile:  
-            break
-    pickled_info = pickle.loads(data)
-    f = open(pickled_info["song_title"]+'_sb.mp3','wb') # Open in binary
-    f.write(pickled_info["song_data"])
-    print('writing to file complete')
-    f.close()
-    pygame.mixer.music.load(pickled_info["song_title"]+'_sb.mp3')
-    pygame.mixer.music.play(loops=0,start=int(int(pickled_info["time_stamp"])/1000))   
-    s.close() # Close the socket when done
-    
 def sendMusic(s,c,addr):
     global currsong
     f = open(currsong,'rb') #open in binary //put back currsong variable 
@@ -112,28 +83,11 @@ def sendMusic(s,c,addr):
     song_info["time_stamp"]=str(pygame.mixer.music.get_pos())
     pickled_info=pickle.dumps(song_info)
     c.sendall(pickled_info)    #send pickled_info
-    time.sleep(5)
+    time.sleep(7)
     c.send(bytes("done",'utf-8'))
     print('sending complete')
-    #c.close() # close connection after processing
-
-def get_ip(e1,sub):
-    global sip
-    sip=e1.get()
-    clientConnect()
-    sub.destroy()
 
 class Controls:
-
-    def connectToServer(event):
-        sub=Toplevel(root)
-        sub.title('server address')
-        sub.minsize(300,100)
-        Label(sub, text="Server IP").grid(row=0)
-        e1 = Entry(sub)
-        e1.grid(row=0, column=1)
-        Button(sub,text='Connect',command=(lambda e=e1,s=sub:get_ip(e,s))).grid(row=3,column=1)
-        Button(sub,text='Cancel',command=sub.destroy).grid(row=3,column=2)
 
     def nextsong(event):
         global index
@@ -203,12 +157,8 @@ def screenMain():
     pausebutton = Button(root,text = 'Pause Song')
     unpausebutton = Button(root,text = 'Unpause Song')
     stopbutton = Button(root,text='Stop Music')
-    clientbutton = Button(root,text='Connect to Server')
-    serverbutton = Button(root,text='Create Server')
     exitbutton = Button(root, text='Exit')
     exitbutton.pack(side=BOTTOM)
-    clientbutton.pack(side=BOTTOM)
-    serverbutton.pack(side=BOTTOM)
     previousbutton.pack(side=LEFT)
     pausebutton.pack(side=LEFT)
     stopbutton.pack(side=LEFT)
@@ -221,7 +171,6 @@ def screenMain():
     pausebutton.bind("<Button-1>",Controls.pausesong)
     unpausebutton.bind("<Button-1>",Controls.unpausesong)
     stopbutton.bind("<Button-1>",Controls.stopsong)
-    clientbutton.bind("<Button-1>",Controls.connectToServer)
     exitbutton.bind("<Button-1>", lambda event: exit())
 
     Thread(target = serverConnect, daemon=True).start()
