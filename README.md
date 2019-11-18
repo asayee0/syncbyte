@@ -18,7 +18,7 @@
 # Team
 Miguel Forde 
 
-Chanelle Glasglow
+Chanelle Glasgow
 
 Marcus Hackshaw
 
