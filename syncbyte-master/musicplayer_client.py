@@ -5,10 +5,10 @@ from mutagen.id3 import ID3
 from tkinter import *
 from threading import Thread
 import time
-#
+
 root = Tk()
-root.title('SyncPlay Client')
-root.minsize(200,200)
+root.title('SyncPlay Server')
+root.minsize(100,50)
 listofsongs = []
 realnames = []
 currsong=''
@@ -38,9 +38,11 @@ def directorychooser():
     currsong=listofsongs[0]
     print(currsong)
     song_info["song_title"]=currsong
+    return True
 
 def updatelabel():
     global index
+    #global songname
     v.set(realnames[index])
    
 def clientConnect():
@@ -50,12 +52,13 @@ def clientConnect():
     port = 5555               # Reserve a port for your service.
     server_addr = (host, port)
     s.connect(server_addr)
+    #s.setblocking(False)
     print('Connection to server successful')
     while True:
         try:
             recvMusic(s)
         except:
-            print('Error in recvMusic()')
+            print('error in recv music probably')
             time.sleep(3)
     
 def recvMusic(s):
@@ -82,6 +85,7 @@ def recvMusic(s):
         f.close()
         pygame.mixer.music.load(pickled_info["song_title"]+'_sb.mp3')
         pygame.mixer.music.play(loops=0,start=int(int(pickled_info["time_stamp"])/1000)+4)
+        #s.close() # Close the socket when done
     
 def sendMusic(s,c,addr):
     global currsong
@@ -99,19 +103,20 @@ def sendMusic(s,c,addr):
 def get_ip(e1,sub):
     global sip
     sip=e1.get()
-    sub.destroy()
     clientConnect()
+    sub.destroy()
 
 class Controls:
-    def connectToServer(event = None):
+
+    def connectToServer(event):
         sub=Toplevel(root)
         sub.title('server address')
         sub.minsize(300,100)
         Label(sub, text="Server IP").grid(row=0)
         e1 = Entry(sub)
         e1.grid(row=0, column=1)
-        Button(sub,text='Connect',command=(lambda e=e1,s=sub:get_ip(e,s))).grid(row=3,column=0)
-        Button(sub,text='Cancel',command=sub.destroy).grid(row=3,column=1)
+        Button(sub,text='Connect',command=(lambda e=e1,s=sub:get_ip(e,s))).grid(row=3,column=1)
+        Button(sub,text='Cancel',command=sub.destroy).grid(row=3,column=2)
 
     def nextsong(event):
         global index
@@ -151,9 +156,6 @@ class Controls:
         updatelabel()
 
 def screenMain():
-    connectButton = Button(root, text='Connect to Server')
-    connectButton.pack()
-    connectButton.bind("<Button-1>", Controls.connectToServer)
     exitbutton = Button(root, text='Exit')
     exitbutton.pack()
     exitbutton.bind("<Button-1>", lambda event: exit())

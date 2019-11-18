@@ -6,6 +6,27 @@ from tkinter import *
 from threading import Thread
 import time
 
+# create a TCP socket for the server
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # get the address of localhost
+host = socket.gethostbyname('localhost')
+port = 5555
+
+    # set options to circumvent proper socket release
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    # create pair for host address (this machine)
+host_addr = (host, port)
+s.bind(host_addr) # bind socket to aforementioned address
+
+    # make socket at server listen for incoming inconnections
+s.listen(10)
+print('Starting to listen for requests')
+c=''
+addr=''
+
+
 root = Tk()
 root.title('SyncPlay Server')
 root.minsize(300,300)
@@ -21,10 +42,6 @@ song_info={
 v = StringVar()
 songlabel = Label(root,textvariable=v,width=35)
 index = 0
-# create a TCP socket for the server
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-c=''
-addr=''
 
 def directorychooser():
     global currsong
@@ -43,27 +60,12 @@ def directorychooser():
     print(currsong)
     song_info["song_title"]=currsong
     pygame.mixer.music.play()
+    return True
 
 def updatelabel():
     global index
     #global songname
     v.set(realnames[index])
-
-def listenForClient():
-    global s
-    # get the address of localhost
-    host = socket.gethostbyname('localhost')
-    port = 5555
-
-    # set options to circumvent proper socket release
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-    # create pair for host address (this machine)
-    host_addr = (host, port)
-    s.bind(host_addr) # bind socket to aforementioned address
-                        # make socket at server listen for incoming inconnections
-    s.listen(10)
-    print('Starting to listen for requests')
 
 def serverConnect():
     global s
@@ -72,6 +74,7 @@ def serverConnect():
     c, addr = s.accept() # accept connection from client
     sendMusic(s,c,addr)
     
+   
 def clientConnect():
     global sip
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         # Create a socket object
@@ -108,9 +111,10 @@ def sendMusic(s,c,addr):
     song_info["time_stamp"]=str(pygame.mixer.music.get_pos())
     pickled_info=pickle.dumps(song_info)
     c.sendall(pickled_info)    #send pickled_info
-    time.sleep(15)
+    time.sleep(5)
     c.send(bytes("done",'utf-8'))
     print('sending complete')
+    #c.close() # close connection after processing
 
 def get_ip(e1,sub):
     global sip
@@ -127,8 +131,8 @@ class Controls:
         Label(sub, text="Server IP").grid(row=0)
         e1 = Entry(sub)
         e1.grid(row=0, column=1)
-        Button(sub,text='Connect',command=(lambda e=e1,s=sub:get_ip(e,s))).grid(row=3,column=0)
-        Button(sub,text='Cancel',command=sub.destroy).grid(row=3,column=1)
+        Button(sub,text='Connect',command=(lambda e=e1,s=sub:get_ip(e,s))).grid(row=3,column=1)
+        Button(sub,text='Cancel',command=sub.destroy).grid(row=3,column=2)
 
     def nextsong(event):
         global index
@@ -177,7 +181,9 @@ class Controls:
         pygame.mixer.music.unpause()
         updatelabel()
 
+
 def screenMain():
+    global result
     label = Label(root,text='Playlist')
     label.pack()
 
@@ -187,23 +193,27 @@ def screenMain():
     for items in realnames:
         listbox.insert(0,items)
     realnames.reverse()
+    message = Label(root,text='Current Song')
+    message.pack()
+    songlabel.pack()
 
     nextbutton = Button(root,text = 'Next Song')
-    nextbutton.pack()
     previousbutton = Button(root,text = 'Previous Song')
-    previousbutton.pack()
     pausebutton = Button(root,text = 'Pause Song')
-    pausebutton.pack()
     unpausebutton = Button(root,text = 'Unpause Song')
-    unpausebutton.pack()
     stopbutton = Button(root,text='Stop Music')
-    stopbutton.pack()
     clientbutton = Button(root,text='Connect to Server')
-    clientbutton.pack()
     serverbutton = Button(root,text='Create Server')
-    serverbutton.pack()
     exitbutton = Button(root, text='Exit')
-    exitbutton.pack()
+    exitbutton.pack(side=BOTTOM)
+    clientbutton.pack(side=BOTTOM)
+    serverbutton.pack(side=BOTTOM)
+    previousbutton.pack(side=LEFT)
+    pausebutton.pack(side=LEFT)
+    stopbutton.pack(side=LEFT)
+    nextbutton.pack(side=RIGHT)
+    unpausebutton.pack(side=RIGHT)
+
 
     nextbutton.bind("<Button-1>",Controls.nextsong)
     previousbutton.bind("<Button-1>",Controls.prevsong)
@@ -212,13 +222,11 @@ def screenMain():
     stopbutton.bind("<Button-1>",Controls.stopsong)
     clientbutton.bind("<Button-1>",Controls.connectToServer)
     exitbutton.bind("<Button-1>", lambda event: exit())
-    songlabel.pack()
-    
+
     Thread(target = serverConnect, daemon=True).start()
     root.mainloop()
 
 def main():
-    listenForClient()
     directorychooser()
     updatelabel()
     screenMain()
