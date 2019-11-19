@@ -1,3 +1,6 @@
+# Code partially taken from www.thecodingpop.com
+# https://www.thecodingpup.com/post_detailed/music-player-in-python
+
 from __future__ import print_function
 import os, pickle, socket, pygame
 from tkinter.filedialog import askdirectory
