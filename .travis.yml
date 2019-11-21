@@ -1,5 +1,0 @@
-language: python
-
-script:
-  - python testhost.py
-  - python testclient.py
